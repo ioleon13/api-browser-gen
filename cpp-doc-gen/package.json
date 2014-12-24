@@ -1,0 +1,11 @@
+{
+  "name": "cpp-doc-gen",
+  "description": "Dash cpp documentation generator",
+  "author": "liya",
+  "version": "0.0.1",
+  "dependencies": {
+    "sequelize": "*",
+    "sqlite3": "*",
+    "request": "*"
+  }
+}
