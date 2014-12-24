@@ -15,15 +15,14 @@
 
     //make dirs
     var prev = "";
-    var SOURCE_DIR='CPP.docset/Contents/Resources/Documents/css';
+    var SOURCE_DIR='CPP-docset/Contents/Resources/Documents/css';
     for (i$ = 0, len$ = (ref$ = SOURCE_DIR.split("/")).length; i$ < len$; ++i$) {
         dir = ref$[i$];
-        fs.exists(prev + dir, function(exists) {
-            if (!exists) {
-                fs.mkdirSync(prev + dir);
-            }
-        });
-        
+        console.log(prev + dir);
+        if(!fs.existsSync(prev + dir)) {
+            fs.mkdirSync(prev + dir);
+        }
+
         prev = prev + dir + "/";
     }
 
