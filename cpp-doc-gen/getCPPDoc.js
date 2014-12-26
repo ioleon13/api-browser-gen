@@ -51,16 +51,19 @@
         Function: [],
         Macro: [],
         Type: [],
-        Constant: []
+        Constant: [],
+        Object: [],
+        Enum: [],
+        Namespace: []
     };
 
     //make a object for sqlite3
     //SQLite database was:
     //CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);
-    objectify = function(x){
+    objectify = function(_name){
         return {
-            name: x[1],
-            path: x[2] + ".html"
+            name: _name,
+            path: _name + ".html"
         };
     };
 
@@ -99,7 +102,7 @@
                             if (valMatch && valMatch.length > 0) {
                                 var value = valMatch[1];
                                 pages.push(value);
-                                obj.Library.push(objectify(["", valMatch[2], valMatch[2]]));
+                                obj.Library.push(objectify(valMatch[2]));
                             } else {
                                 pages.push(null);
                             }
@@ -127,17 +130,51 @@
                             html_data = valMatch[1];
 
                             //process entries
-                            process_entries(html_data, function(classes, functions, macros, types, constants) {
+                            process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces) {
+                                html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                                final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
+                                fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
 
+                                classes.forEach(function (doc_class) {
+                                    obj.Class.push(objectify(doc_class.name));
+                                });
+
+                                functions.forEach(function (doc_function) {
+                                    obj.Function.push(objectify(doc_function.name));
+                                });
+
+                                macros.forEach(function (doc_macro) {
+                                    obj.Macro.push(objectify(doc_macro.name));
+                                });
+
+                                types.forEach(function (doc_type) {
+                                    obj.Type.push(objectify(doc_type.name));
+                                });
+
+                                constants.forEach(function (doc_constant) {
+                                    obj.Constant.push(objectify(doc_constant.name));
+                                });
+
+                                objects.forEach(function (doc_object) {
+                                    obj.Object.push(objectify(doc_object.name));
+                                });
+
+                                enums.forEach(function (doc_enum) {
+                                    obj.Enum.push(objectify(doc_enum.name));
+                                });
+
+                                namespaces.forEach(function (doc_namespace) {
+                                    obj.Namespace.push(objectify(doc_namespace.name));
+                                });
                             });
-
-                            final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
-                            fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
                         }
                     }
-                    return;
+
+                    //console.log(obj.Function);
+                    //return;
                     pageCount++;
                     if (pageCount === pages.length) {
+                        console.log(obj.Function);
                         return;
                     }
                     parsePage(pages[pageCount]);
