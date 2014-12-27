@@ -5,6 +5,8 @@
     var fs = require('fs');
     var url = require('url');
     var process_entries = require('./processEntries.js');
+    var process_classes = require('./processClasses.js');
+    var process_function_like = require('./processFunctionlike.js');
 
     var pages = [];
     var options = {
@@ -165,6 +167,24 @@
 
                                 namespaces.forEach(function (doc_namespace) {
                                     obj.Namespace.push(objectify(doc_namespace.name));
+                                });
+
+                                process_classes(classes, function() {
+                                    process_function_like(functions, function(error) {
+                                        process_function_like(macros, function(error) {
+                                            process_function_like(types, function(error) {
+                                                process_function_like(constants, function(error) {
+                                                    process_function_like(enums, function(error) {
+                                                        process_function_like(objects, function(error) {
+                                                            process_function_like(namespaces, function(error) {
+                                                                console.log("Complete to process entries for: " + file_name);
+                                                            })
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
                                 });
                             });
                         }
