@@ -23,7 +23,7 @@ module.exports = function (functions, callback_) {
     parseFunction(functions[0]);
     function parseFunction(function_) {
         options.path = function_.url;
-        console.log('parsing the page: ' + options.hostname + options.path);
+        console.log('parsing the functionlike page: ' + options.hostname + options.path);
 
         functionReq = http.get(options, function(res) {
             body = '';
@@ -49,6 +49,8 @@ module.exports = function (functions, callback_) {
                         var valMatch = tagMatches[i].match(valRE);
                         html_data = valMatch[1];
                         html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                        html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
+                        html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                         final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
                         fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
                     }
@@ -56,7 +58,7 @@ module.exports = function (functions, callback_) {
 
                 funtionCount++;
                 if (funtionCount === functions.length) {
-                    callback_(NULL);
+                    callback_(null);
                     return;
                 }
                 parseFunction(functions[funtionCount]);

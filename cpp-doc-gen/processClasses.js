@@ -25,7 +25,7 @@ module.exports = function (classes, callback_) {
     parseClass(classes[0]);
     function parseClass(class_) {
         options.path = class_.url;
-        console.log('parsing the page: ' + options.hostname + options.path);
+        console.log('parsing the class page: ' + options.hostname + options.path);
 
         classReq = http.get(options, function(res) {
             body = '';
@@ -52,8 +52,10 @@ module.exports = function (classes, callback_) {
                         html_data = valMatch[1];
 
                         //process entries
-                        process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces) {
+                        process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns) {
                             html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                            html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
+                            html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                             final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
                             fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
 
@@ -83,7 +85,9 @@ module.exports = function (classes, callback_) {
                                     process_function_like(types, function(error) {
                                         process_function_like(constants, function(error) {
                                             process_function_like(enums, function(error) {
-                                                console.log('Complete to process function like pages for ' + file_name);
+                                                process_function_like(unknowns, function(error) {
+                                                    console.log('Complete to process function like pages for ' + file_name);
+                                                })
                                             });
                                         });
                                     });

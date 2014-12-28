@@ -132,8 +132,10 @@
                             html_data = valMatch[1];
 
                             //process entries
-                            process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces) {
+                            process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns) {
                                 html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                                html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
+                                html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                                 final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
                                 fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
 
@@ -177,8 +179,10 @@
                                                     process_function_like(enums, function(error) {
                                                         process_function_like(objects, function(error) {
                                                             process_function_like(namespaces, function(error) {
-                                                                console.log("Complete to process entries for: " + file_name);
-                                                            })
+                                                                process_function_like(unknowns, function(error) {
+                                                                    console.log("Complete to process entries for: " + file_name);
+                                                                });
+                                                            });
                                                         });
                                                     });
                                                 });
@@ -193,8 +197,8 @@
                     //console.log(obj.Function);
                     //return;
                     pageCount++;
-                    if (pageCount === pages.length) {
-                        console.log(obj.Function);
+                    if (pageCount === /*pages.length*/6) {
+                        //console.log(obj.Function);
                         return;
                     }
                     parsePage(pages[pageCount]);

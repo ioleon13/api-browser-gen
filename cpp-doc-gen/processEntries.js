@@ -3,7 +3,7 @@ var http = require('http');
 
 module.exports = function (body, callback_) {
     var classes = [], functions = [], macros = [], types = [],
-    constants = [], objects = [], enums = [], namespaces = [];
+    constants = [], objects = [], enums = [], namespaces = [], unknowns = [];
     /*var entry = {
         name: "",
         url: "",
@@ -45,9 +45,10 @@ module.exports = function (body, callback_) {
             } else if (type.indexOf("namespace") >= 0) {
                 namespaces.push(entry);
             } else {
+                unknowns.push(entry);
                 console.log("Error: the type was unknown: " + type);
             }
         }
     }
-    callback_(classes, functions, macros, types, constants, objects, enums, namespaces);
+    callback_(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns);
 }
