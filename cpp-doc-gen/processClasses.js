@@ -15,6 +15,8 @@ module.exports = function (classes, callback_) {
     var final_data;
     var file_name;
     var classReq, body;
+    var functions = [], macros = [], types = [], constants = [],
+    objects = [], enums = [], namespaces = [], unknowns = [];
 
     if (classes.length === 0) {
         callback_();
@@ -52,32 +54,21 @@ module.exports = function (classes, callback_) {
                         html_data = valMatch[1];
 
                         //process entries
-                        process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns) {
+                        process_entries(html_data, function(classes_, functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
                             html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
                             html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                             html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                             final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
                             fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
 
-                            functions.forEach(function (doc_function) {
-                                obj.Function.push(objectify(doc_function.name));
-                            });
-
-                            macros.forEach(function (doc_macro) {
-                                obj.Macro.push(objectify(doc_macro.name));
-                            });
-
-                            types.forEach(function (doc_type) {
-                                obj.Type.push(objectify(doc_type.name));
-                            });
-
-                            constants.forEach(function (doc_constant) {
-                                obj.Constant.push(objectify(doc_constant.name));
-                            });
-
-                            enums.forEach(function (doc_enum) {
-                                obj.Enum.push(objectify(doc_enum.name));
-                            });
+                            Array.prototype.push.apply(functions, functions_);
+                            Array.prototype.push.apply(macros, macros_);
+                            Array.prototype.push.apply(types, types_);
+                            Array.prototype.push.apply(constants, constants_);
+                            Array.prototype.push.apply(enums, enums_);
+                            Array.prototype.push.apply(objects, objects_);
+                            Array.prototype.push.apply(namespaces, namespaces_);
+                            Array.prototype.push.apply(unknowns, unknowns_);
 
                             //process function like page, just save html files
                             process_function_like(functions, function(error) {
@@ -99,7 +90,7 @@ module.exports = function (classes, callback_) {
 
                 classCount++;
                 if (classCount === classes.length) {
-                    callback_();
+                    callback_(functions, macros, types, constants, objects, enums, namespaces, unknowns);
                     return;
                 }
                 parseClass(classes[classCount]);

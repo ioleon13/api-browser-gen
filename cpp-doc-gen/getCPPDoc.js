@@ -1,12 +1,12 @@
 (function() {
     var http = require('http');
     var request = require('request');
-    var Sequelize = require("sequelize");
     var fs = require('fs');
     var url = require('url');
     var process_entries = require('./processEntries.js');
     var process_classes = require('./processClasses.js');
     var process_function_like = require('./processFunctionlike.js');
+    var push_to_DB = require('./pushToDB.js');
 
     var pages = [];
     var options = {
@@ -171,7 +171,35 @@
                                     obj.Namespace.push(objectify(doc_namespace.name));
                                 });
 
-                                process_classes(classes, function() {
+                                process_classes(classes, function(functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
+                                    functions_.forEach(function (doc_function) {
+                                        obj.Function.push(objectify(doc_function.name));
+                                    });
+
+                                    macros_.forEach(function (doc_macro) {
+                                        obj.Macro.push(objectify(doc_macro.name));
+                                    });
+
+                                    types_.forEach(function (doc_type) {
+                                        obj.Type.push(objectify(doc_type.name));
+                                    });
+
+                                    constants_.forEach(function (doc_constant) {
+                                        obj.Constant.push(objectify(doc_constant.name));
+                                    });
+
+                                    objects_.forEach(function (doc_object) {
+                                        obj.Object.push(objectify(doc_object.name));
+                                    });
+
+                                    enums_.forEach(function (doc_enum) {
+                                        obj.Enum.push(objectify(doc_enum.name));
+                                    });
+
+                                    namespaces_.forEach(function (doc_namespace) {
+                                        obj.Namespace.push(objectify(doc_namespace.name));
+                                    });
+
                                     process_function_like(functions, function(error) {
                                         process_function_like(macros, function(error) {
                                             process_function_like(types, function(error) {
@@ -197,8 +225,11 @@
                     //console.log(obj.Function);
                     //return;
                     pageCount++;
-                    if (pageCount === /*pages.length*/6) {
+                    if (pageCount === pages.length) {
                         //console.log(obj.Function);
+                        push_to_DB(obj, function() {
+                            console.log('success to push to DB');
+                        });
                         return;
                     }
                     parsePage(pages[pageCount]);

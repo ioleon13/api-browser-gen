@@ -37,7 +37,7 @@ module.exports = function (functions, callback_) {
                 //get the filename
                 var split_file = function_.url.split('/');
                 file_name = split_file[split_file.length-2];
-                console.log("save class file: " + file_name + ".html...");
+                console.log("save functionlike file: " + file_name + ".html...");
 
                 //get html data and save to html files
                 var reStr = '<div\\s.*?class=\"C_supportbottom\"[^>]*><\/div><\/div>([^]*?)<div\\s.*?id=\"I_nav\"[^>]*>';
