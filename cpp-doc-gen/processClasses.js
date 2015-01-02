@@ -1,44 +1,41 @@
 var fs = require('fs');
-var http = require('http');
+var request = require('request');
 var process_entries = require('./processEntries.js');
 var process_function_like = require('./processFunctionlike.js');
 
+var HOST_URL = 'http://www.cplusplus.com';
+
 var options = {
     method: 'GET',
-    hostname: 'www.cplusplus.com',
-    port: 80,
-    path: '/reference/',
+    url: HOST_URL + '/reference/',
+    encoding: 'utf8'
 };
 
 module.exports = function (classes, callback_) {
     var html_data;
     var final_data;
     var file_name;
-    var classReq, body;
     var functions = [], macros = [], types = [], constants = [],
     objects = [], enums = [], namespaces = [], unknowns = [];
 
     if (classes.length === 0) {
-        callback_();
+        callback_(functions, macros, types, constants, objects, enums, namespaces, unknowns);
         return;
     }
 
     var classCount = 0;
     parseClass(classes[0]);
     function parseClass(class_) {
-        options.path = class_.url;
-        console.log('parsing the class page: ' + options.hostname + options.path);
+        options.url = HOST_URL + class_.url;
+        console.log('parsing the class page: ' + options.url);
 
-        classReq = http.get(options, function(res) {
-            body = '';
-            res.setEncoding('utf8');
+        request(options, function (error, response, body) {
+            if (error) {
+                return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
+            }
 
-            res.on('data', function(chunk) {
-                body += chunk;
-            });
-
-            res.on('end', function() {
-                //get the filename
+            if (!error && response.statusCode === 200) {
+                //get the file name
                 var split_file = class_.url.split('/');
                 file_name = split_file[split_file.length-2];
                 console.log("save class file: " + file_name + ".html...");
@@ -94,7 +91,7 @@ module.exports = function (classes, callback_) {
                     return;
                 }
                 parseClass(classes[classCount]);
-            });
+            }
         });
     };
 }

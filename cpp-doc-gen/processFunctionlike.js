@@ -1,18 +1,18 @@
 var fs = require('fs');
-var http = require('http');
+var request = require('request');
+
+var HOST_URL = 'http://www.cplusplus.com';
 
 var options = {
     method: 'GET',
-    hostname: 'www.cplusplus.com',
-    port: 80,
-    path: '/reference/',
+    url: HOST_URL + '/reference/',
+    encoding: 'utf8'
 };
 
 module.exports = function (functions, callback_) {
     var html_data;
     var final_data;
     var file_name;
-    var functionReq, body;
 
     if (functions.length === 0) {
         callback_("The array was empty");
@@ -22,19 +22,15 @@ module.exports = function (functions, callback_) {
     var funtionCount = 0;
     parseFunction(functions[0]);
     function parseFunction(function_) {
-        options.path = function_.url;
-        console.log('parsing the functionlike page: ' + options.hostname + options.path);
+        options.url = HOST_URL + function_.url;
+        console.log('parsing the functionlike page: ' + options.url);
 
-        functionReq = http.get(options, function(res) {
-            body = '';
-            res.setEncoding('utf8');
+        request(options, function (error, response, body) {
+            if (error) {
+                return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
+            }
 
-            res.on('data', function(chunk) {
-                body += chunk;
-            });
-
-            res.on('end', function() {
-                //get the filename
+            if (!error && response.statusCode === 200) {
                 var split_file = function_.url.split('/');
                 file_name = split_file[split_file.length-2];
                 console.log("save functionlike file: " + file_name + ".html...");
@@ -62,7 +58,7 @@ module.exports = function (functions, callback_) {
                     return;
                 }
                 parseFunction(functions[funtionCount]);
-            });
+            }
         });
     }
 }

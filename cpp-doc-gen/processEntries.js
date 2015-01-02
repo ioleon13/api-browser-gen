@@ -1,5 +1,4 @@
 var fs = require('fs');
-var http = require('http');
 
 module.exports = function (body, callback_) {
     var classes = [], functions = [], macros = [], types = [],

@@ -1,5 +1,4 @@
 (function() {
-    var http = require('http');
     var request = require('request');
     var fs = require('fs');
     var url = require('url');
@@ -8,12 +7,13 @@
     var process_function_like = require('./processFunctionlike.js');
     var push_to_DB = require('./pushToDB.js');
 
+    var HOST_URL = 'http://www.cplusplus.com';
+
     var pages = [];
     var options = {
         method: 'GET',
-        hostname: 'www.cplusplus.com',
-        port: 80,
-        path: '/reference/',
+        url: HOST_URL + '/reference/',
+        encoding: 'utf8'
     };
 
     //make dirs
@@ -74,24 +74,20 @@
     var file_name;
 
     // start parse page
-    var pageReq, body;
     var pageCount = 0;
     parsePage("");
     function parsePage(page) {
         if (page !== "") {
-            options.path = page;
+            options.url = HOST_URL + page;
         }
-        console.log('parsing the page: ' + options.hostname + options.path);
+        console.log('parsing the page: ' + options.url);
 
-        pageReq = http.get(options, function(res) {
-            body = '';
-            res.setEncoding('utf8');
+        request(options, function (error, response, body) {
+            if (error) {
+                return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
+            }
 
-            res.on('data', function(chunk) {
-                body += chunk;
-            });
-
-            res.on('end', function() {
+            if (!error && response.statusCode === 200) {
                 if (page === "") {
                     var reStr = '<a\\s.*?href=\"([^\""]+)\"[^>]*><span>&lt;([^]*?)&gt;';
                     var tagRE = new RegExp(reStr, 'gm');
@@ -234,11 +230,7 @@
                     }
                     parsePage(pages[pageCount]);
                 }
-            });
-
-            res.on('error', function(e) {
-                console.log(e.message);
-            });
+            };
         });
     };
 }).call(this);
