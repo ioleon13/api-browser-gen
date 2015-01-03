@@ -84,6 +84,10 @@
 
         request(options, function (error, response, body) {
             if (error) {
+                push_to_DB(obj, function() {
+                    console.log('success to push to DB');
+                });
+                
                 return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
             }
 

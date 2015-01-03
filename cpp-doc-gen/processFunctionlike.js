@@ -27,6 +27,7 @@ module.exports = function (functions, callback_) {
 
         request(options, function (error, response, body) {
             if (error) {
+                callback_("Failed to request the page");
                 return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
             }
 

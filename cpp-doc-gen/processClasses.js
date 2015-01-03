@@ -31,6 +31,7 @@ module.exports = function (classes, callback_) {
 
         request(options, function (error, response, body) {
             if (error) {
+                callback_(functions, macros, types, constants, objects, enums, namespaces, unknowns);
                 return console.error('Failed to request the page: ' + options.url + ', error: ' + error);
             }
 
