@@ -11,7 +11,7 @@ var options = {
     encoding: 'utf8'
 };
 
-module.exports = function (classes, callback_) {
+module.exports = function (libname, classes, callback_) {
     var html_data;
     var final_data;
     var file_name;
@@ -38,7 +38,13 @@ module.exports = function (classes, callback_) {
             if (!error && response.statusCode === 200) {
                 //get the file name
                 var split_file = class_.url.split('/');
-                file_name = split_file[split_file.length-2];
+                for (var i = 1; i < split_file.length - 1; i++) {
+                    file_name += split_file[i];
+                    if (i !== split_file.length-2) {
+                        file_name += '-';
+                    }
+                };
+                //file_name = libname + '-' +split_file[split_file.length-2];
                 console.log("save class file: " + file_name + ".html...");
 
                 //get html data and save to html files
@@ -52,8 +58,10 @@ module.exports = function (classes, callback_) {
                         html_data = valMatch[1];
 
                         //process entries
-                        process_entries(html_data, function(classes_, functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
-                            html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                        process_entries(file_name, html_data, function(classes_, functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
+                            html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                            html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2.html"><b>');
+                            html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2-$3.html"><b>');
                             html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                             html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                             final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
@@ -69,12 +77,12 @@ module.exports = function (classes, callback_) {
                             Array.prototype.push.apply(unknowns, unknowns_);
 
                             //process function like page, just save html files
-                            process_function_like(functions, function(error) {
-                                process_function_like(macros, function(error) {
-                                    process_function_like(types, function(error) {
-                                        process_function_like(constants, function(error) {
-                                            process_function_like(enums, function(error) {
-                                                process_function_like(unknowns, function(error) {
+                            process_function_like(file_name, functions, function(error) {
+                                process_function_like(file_name, macros, function(error) {
+                                    process_function_like(file_name, types, function(error) {
+                                        process_function_like(file_name, constants, function(error) {
+                                            process_function_like(file_name, enums, function(error) {
+                                                process_function_like(file_name, unknowns, function(error) {
                                                     console.log('Complete to process function like pages for ' + file_name);
                                                 })
                                             });

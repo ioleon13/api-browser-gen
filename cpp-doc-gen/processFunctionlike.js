@@ -9,7 +9,7 @@ var options = {
     encoding: 'utf8'
 };
 
-module.exports = function (functions, callback_) {
+module.exports = function (classname, functions, callback_) {
     var html_data;
     var final_data;
     var file_name;
@@ -33,7 +33,14 @@ module.exports = function (functions, callback_) {
 
             if (!error && response.statusCode === 200) {
                 var split_file = function_.url.split('/');
-                file_name = split_file[split_file.length-2];
+                for (var i = 1; i < split_file.length - 1; i++) {
+                    file_name += split_file[i];
+                    if (i !== split_file.length-2) {
+                        file_name += '-';
+                    }
+                };
+
+                //file_name = classname + '-' +split_file[split_file.length-2];
                 console.log("save functionlike file: " + file_name + ".html...");
 
                 //get html data and save to html files
@@ -45,7 +52,9 @@ module.exports = function (functions, callback_) {
                         var valRE = new RegExp(reStr, 'm');
                         var valMatch = tagMatches[i].match(valRE);
                         html_data = valMatch[1];
-                        html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                        html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                        html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2.html"><b>');
+                        html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2-$3.html"><b>');
                         html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                         html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                         final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";

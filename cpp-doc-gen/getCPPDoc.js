@@ -18,7 +18,8 @@
 
     //make dirs
     var prev = "";
-    var SOURCE_DIR='CPP-docset/Contents/Resources/Documents/css';
+    var DOC_DIR = 'CPP-docset/Contents/Resources/Documents/';
+    var SOURCE_DIR = DOC_DIR + 'css';
     for (i$ = 0, len$ = (ref$ = SOURCE_DIR.split("/")).length; i$ < len$; ++i$) {
         dir = ref$[i$];
         if (!fs.existsSync(prev + dir)) {
@@ -62,10 +63,10 @@
     //make a object for sqlite3
     //SQLite database was:
     //CREATE TABLE searchIndex(id INTEGER PRIMARY KEY, name TEXT, type TEXT, path TEXT);
-    objectify = function(_name){
+    objectify = function(_name, _filename){
         return {
             name: _name,
-            path: _name + ".html"
+            path: _filename + ".html"
         };
     };
 
@@ -84,6 +85,7 @@
 
         request(options, function (error, response, body) {
             if (error) {
+                console.log('Error was occurred, push to db...');
                 push_to_DB(obj, function() {
                     console.log('success to push to DB');
                 });
@@ -104,7 +106,7 @@
                             if (valMatch && valMatch.length > 0) {
                                 var value = valMatch[1];
                                 pages.push(value);
-                                obj.Library.push(objectify(valMatch[2]));
+                                obj.Library.push(objectify(valMatch[2], valMatch[2]));
                             } else {
                                 pages.push(null);
                             }
@@ -132,82 +134,84 @@
                             html_data = valMatch[1];
 
                             //process entries
-                            process_entries(html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns) {
-                                html_data = html_data.replace(/<a href= \".*?\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                            process_entries(file_name, html_data, function(classes, functions, macros, types, constants, objects, enums, namespaces, unknowns) {
+                                html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1.html"><b>');
+                                html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2.html"><b>');
+                                html_data = html_data.replace(/<a href= \"\/reference\/([^\/]+)\/([^\/]+)\/([^\/]+)\/\"[^>]*><b>/g, '<a href= "$1-$2-$3.html"><b>');
                                 html_data = html_data.replace(/<a href=\"\/([^\/]+)\"[^>]*>([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                                 html_data = html_data.replace(/<a href=\"&lt;([^]*?)&gt;\.html\">([^]*?)<\/a>/g, '<a href="$1.html">$2</a>');
                                 final_data = "<!-- single file version -->\n<!DOCTYPE html>\n<html>\n<head>\n  <link href=\"css/main.css\" rel=\"stylesheet\" type=\"text/css\">\n  <meta charset=\"utf-8\" />\n</head>\n<body>" + html_data + "\n</body>\n</html>\n";
-                                fs.writeFileSync("CPP-docset/Contents/Resources/Documents/" + file_name + ".html", final_data, 'utf-8');
+                                fs.writeFileSync(DOC_DIR + file_name + ".html", final_data, 'utf-8');
 
                                 classes.forEach(function (doc_class) {
-                                    obj.Class.push(objectify(doc_class.name));
+                                    obj.Class.push(objectify(doc_class.name, doc_class.filename));
                                 });
 
                                 functions.forEach(function (doc_function) {
-                                    obj.Function.push(objectify(doc_function.name));
+                                    obj.Function.push(objectify(doc_function.name, doc_function.filename));
                                 });
 
                                 macros.forEach(function (doc_macro) {
-                                    obj.Macro.push(objectify(doc_macro.name));
+                                    obj.Macro.push(objectify(doc_macro.name, doc_macro.filename));
                                 });
 
                                 types.forEach(function (doc_type) {
-                                    obj.Type.push(objectify(doc_type.name));
+                                    obj.Type.push(objectify(doc_type.name, doc_type.filename));
                                 });
 
                                 constants.forEach(function (doc_constant) {
-                                    obj.Constant.push(objectify(doc_constant.name));
+                                    obj.Constant.push(objectify(doc_constant.name, doc_constant.filename));
                                 });
 
                                 objects.forEach(function (doc_object) {
-                                    obj.Object.push(objectify(doc_object.name));
+                                    obj.Object.push(objectify(doc_object.name, doc_object.filename));
                                 });
 
                                 enums.forEach(function (doc_enum) {
-                                    obj.Enum.push(objectify(doc_enum.name));
+                                    obj.Enum.push(objectify(doc_enum.name, doc_enum.filename));
                                 });
 
                                 namespaces.forEach(function (doc_namespace) {
-                                    obj.Namespace.push(objectify(doc_namespace.name));
+                                    obj.Namespace.push(objectify(doc_namespace.name, doc_namespace.filename));
                                 });
 
-                                process_classes(classes, function(functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
+                                process_classes(file_name, classes, function(functions_, macros_, types_, constants_, objects_, enums_, namespaces_, unknowns_) {
                                     functions_.forEach(function (doc_function) {
-                                        obj.Function.push(objectify(doc_function.name));
+                                        obj.Function.push(objectify(doc_function.name, doc_function.filename));
                                     });
 
                                     macros_.forEach(function (doc_macro) {
-                                        obj.Macro.push(objectify(doc_macro.name));
+                                        obj.Macro.push(objectify(doc_macro.name, doc_macro.filename));
                                     });
 
                                     types_.forEach(function (doc_type) {
-                                        obj.Type.push(objectify(doc_type.name));
+                                        obj.Type.push(objectify(doc_type.name, doc_type.filename));
                                     });
 
                                     constants_.forEach(function (doc_constant) {
-                                        obj.Constant.push(objectify(doc_constant.name));
+                                        obj.Constant.push(objectify(doc_constant.name, doc_constant.filename));
                                     });
 
                                     objects_.forEach(function (doc_object) {
-                                        obj.Object.push(objectify(doc_object.name));
+                                        obj.Object.push(objectify(doc_object.name, doc_object.filename));
                                     });
 
                                     enums_.forEach(function (doc_enum) {
-                                        obj.Enum.push(objectify(doc_enum.name));
+                                        obj.Enum.push(objectify(doc_enum.name, doc_enum.filename));
                                     });
 
                                     namespaces_.forEach(function (doc_namespace) {
-                                        obj.Namespace.push(objectify(doc_namespace.name));
+                                        obj.Namespace.push(objectify(doc_namespace.name, doc_namespace.filename));
                                     });
 
-                                    process_function_like(functions, function(error) {
-                                        process_function_like(macros, function(error) {
-                                            process_function_like(types, function(error) {
-                                                process_function_like(constants, function(error) {
-                                                    process_function_like(enums, function(error) {
-                                                        process_function_like(objects, function(error) {
-                                                            process_function_like(namespaces, function(error) {
-                                                                process_function_like(unknowns, function(error) {
+                                    process_function_like(file_name, functions, function(error) {
+                                        process_function_like(file_name, macros, function(error) {
+                                            process_function_like(file_name, types, function(error) {
+                                                process_function_like(file_name, constants, function(error) {
+                                                    process_function_like(file_name, enums, function(error) {
+                                                        process_function_like(file_name, objects, function(error) {
+                                                            process_function_like(file_name, namespaces, function(error) {
+                                                                process_function_like(file_name, unknowns, function(error) {
                                                                     console.log("Complete to process entries for: " + file_name);
                                                                 });
                                                             });
@@ -227,6 +231,7 @@
                     pageCount++;
                     if (pageCount === pages.length) {
                         //console.log(obj.Function);
+                        console.log('Parse completed! push to db...');
                         push_to_DB(obj, function() {
                             console.log('success to push to DB');
                         });

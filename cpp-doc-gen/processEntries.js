@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-module.exports = function (body, callback_) {
+module.exports = function (classname, body, callback_) {
     var classes = [], functions = [], macros = [], types = [],
     constants = [], objects = [], enums = [], namespaces = [], unknowns = [];
     /*var entry = {
@@ -19,9 +19,17 @@ module.exports = function (body, callback_) {
             var _url = valMatch[1];
             var split_url = _url.split('/');
             var _name = split_url[split_url.length-2];
+            var _filename = '';
+            for (var i = 1; i < split_url.length - 1; i++) {
+                _filename += split_url[i];
+                if (i !== split_url.length-2) {
+                    _filename += '-';
+                }
+            };
 
             var entry = {
                 name: _name,
+                filename: _filename,
                 url: _url,
             };
 
