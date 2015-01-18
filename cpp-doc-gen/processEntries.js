@@ -20,9 +20,9 @@ module.exports = function (classname, body, callback_) {
             var split_url = _url.split('/');
             var _name = split_url[split_url.length-2];
             var _filename = '';
-            for (var i = 1; i < split_url.length - 1; i++) {
-                _filename += split_url[i];
-                if (i !== split_url.length-2) {
+            for (var j = 2; j < split_url.length - 1; j++) {
+                _filename += split_url[j];
+                if (j !== split_url.length-2) {
                     _filename += '-';
                 }
             };

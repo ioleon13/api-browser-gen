@@ -12,7 +12,6 @@ var options = {
 module.exports = function (classname, functions, callback_) {
     var html_data;
     var final_data;
-    var file_name;
 
     if (functions.length === 0) {
         callback_("The array was empty");
@@ -33,7 +32,8 @@ module.exports = function (classname, functions, callback_) {
 
             if (!error && response.statusCode === 200) {
                 var split_file = function_.url.split('/');
-                for (var i = 1; i < split_file.length - 1; i++) {
+                var file_name = '';
+                for (var i = 2; i < split_file.length - 1; i++) {
                     file_name += split_file[i];
                     if (i !== split_file.length-2) {
                         file_name += '-';

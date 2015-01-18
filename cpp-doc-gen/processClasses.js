@@ -14,7 +14,7 @@ var options = {
 module.exports = function (libname, classes, callback_) {
     var html_data;
     var final_data;
-    var file_name;
+    var file_name = '';
     var functions = [], macros = [], types = [], constants = [],
     objects = [], enums = [], namespaces = [], unknowns = [];
 
@@ -38,7 +38,7 @@ module.exports = function (libname, classes, callback_) {
             if (!error && response.statusCode === 200) {
                 //get the file name
                 var split_file = class_.url.split('/');
-                for (var i = 1; i < split_file.length - 1; i++) {
+                for (var i = 2; i < split_file.length - 1; i++) {
                     file_name += split_file[i];
                     if (i !== split_file.length-2) {
                         file_name += '-';
